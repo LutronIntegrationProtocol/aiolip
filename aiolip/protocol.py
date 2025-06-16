@@ -10,6 +10,7 @@ LIP_ERROR_RE = re.compile("~ERROR,")
 LIP_PROTOCOL_LOGIN = "login: "
 LIP_PROTOCOL_PASSWORD = "password: "
 LIP_PROTOCOL_GNET = "GNET> "
+LIP_PROTOCOL_QNET = "QNET> "
 
 LIP_USERNAME = "lutron"
 LIP_PASSWORD = "integration"

@@ -18,6 +18,7 @@ from .protocol import (
     LIP_PASSWORD,
     LIP_PORT,
     LIP_PROTOCOL_GNET,
+    LIP_PROTOCOL_QNET,
     LIP_PROTOCOL_LOGIN,
     LIP_PROTOCOL_PASSWORD,
     LIP_QUERY_CHAR,
@@ -86,7 +87,7 @@ class LIP:
         )
         await self._lip.async_write_command(LIP_PASSWORD)
         _verify_expected_response(
-            await self._lip.async_readuntil(" "), LIP_PROTOCOL_GNET
+            await self._lip.async_readuntil(" "), LIP_PROTOCOL_QNET
         )
         self.connection_state = LIPConenctionState.CONNECTED
         self._host = server_addr
@@ -200,8 +201,8 @@ class LIP:
 
     def _process_message(self, response):
         """Process a lip message."""
-        if response is not None and response.startswith(LIP_PROTOCOL_GNET):
-            response = response[len(LIP_PROTOCOL_GNET) :]
+        if response is not None and response.startswith(LIP_PROTOCOL_QNET):
+            response = response[len(LIP_PROTOCOL_QNET) :]
 
         if not response or LIP_EMPTY_RE.match(response):
             return
@@ -259,5 +260,6 @@ class LIP:
 
 
 def _verify_expected_response(received, expected):
-    if not received.startswith(expected):
+
+    if not expected in received:
         raise LIPProtocolError(received, expected)
