@@ -170,18 +170,20 @@ class LIP:
         """Process one message or event."""
         async with self._read_connect_lock:
             read_task = asyncio.create_task(self._lip.async_readline())
+            disconnect_task = asyncio.create_task(self._disconnect_event.wait())
+            reconnecting_task = asyncio.create_task(self._reconnecting_event.wait())
 
             _, pending = await asyncio.wait(
                 (
                     read_task,
-                    self._disconnect_event.wait(),
-                    self._reconnecting_event.wait(),
+                    disconnect_task,
+                    reconnecting_task,
                 ),
                 timeout=LIP_READ_TIMEOUT,
                 return_when=asyncio.FIRST_COMPLETED,
             )
-            for coro in pending:
-                coro.cancel()
+            for task in pending:
+                task.cancel()
 
         if self._disconnect_event.is_set():
             _LOGGER.debug("Stopping run because of disconnect_event")
