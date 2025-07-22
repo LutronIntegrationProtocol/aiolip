@@ -78,6 +78,18 @@ class LIP:
             self.connection_state = LIPConnectionState.NOT_CONNECTED
             raise
 
+        # set the correct monitoring
+        await self.action(LIPMode.MONITORING, 12, 2)  # disable prompt state
+        await self.action(
+            LIPMode.MONITORING, 255, 2
+        )  # disable everything (not reply state 11, not prompt 12)
+        await self.action(LIPMode.MONITORING, 3, 1)  # Button
+        await self.action(LIPMode.MONITORING, 4, 1)  # Led
+        await self.action(LIPMode.MONITORING, 5, 1)  # Zone
+        await self.action(LIPMode.MONITORING, 6, 1)  # Occupancy
+        await self.action(LIPMode.MONITORING, 8, 1)  # Scene
+        await self.action(LIPMode.MONITORING, 10, 1)  # SysVar
+
     async def _async_connect(self, server_addr):
         """Make the connection."""
         _LOGGER.debug("Connecting to %s", server_addr)
@@ -220,7 +232,7 @@ class LIP:
 
         try:
             self._process_message(read_task.result())
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return
         except (asyncio.InvalidStateError, BrokenPipeError) as ex:
             _LOGGER.debug("Error processing message", exc_info=ex)
@@ -265,10 +277,10 @@ class LIP:
         assert isinstance(mode, LIPMode)
 
         request = ",".join([mode.name, *[str(key) for key in cmd]])
+        _LOGGER.debug("Outgoing message:%s-%s", protocol_header, request)
         await self._lip.async_write_command(f"{protocol_header}{request}")
 
 
 def _verify_expected_response(received, expected):
-
-    if not expected in received:
+    if expected not in received:
         raise LIPProtocolError(received, expected)

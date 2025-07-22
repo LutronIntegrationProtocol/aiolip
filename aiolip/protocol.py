@@ -3,6 +3,7 @@
 import asyncio
 from enum import Enum
 import re
+import time
 
 from .data import LIPMessage, LIPMode, LIPOperation
 
@@ -60,7 +61,7 @@ class LIPSocket:
     async def async_readuntil(self, separator, timeout=SOCKET_TIMEOUT):
         """Read until separator is ended."""
         buffer = await asyncio.wait_for(
-            self._reader.readuntil(seperator.encode("UTF-8")), timeout=timeout
+            self._reader.readuntil(separator.encode("UTF-8")), timeout=timeout
         )
         if buffer == b"":
             return None
