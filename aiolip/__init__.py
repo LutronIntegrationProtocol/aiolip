@@ -5,7 +5,9 @@ import logging
 import socket
 import time
 
-__version__ = "1.1.6"
+__version__ = "1.1.7"
+
+from collections.abc import Callable
 
 __all__ = ["LIPAction", "LIPGroupState", "LIPLedState"]
 
@@ -20,22 +22,16 @@ from .data import (
 from .exceptions import LIPConnectionStateError, LIPProtocolError
 from .protocol import (
     CONNECT_TIMEOUT,
-    LIP_ACTION_CHAR,
-    LIP_EMPTY_RE,
-    LIP_ERROR_RE,
     LIP_KEEP_ALIVE,
     LIP_KEEP_ALIVE_INTERVAL,
-    LIP_KEEPALIVE_RE,
     LIP_PASSWORD,
     LIP_PORT,
     LIP_PROTOCOL_GENERIC_NET,
     LIP_PROTOCOL_GNET,
-    LIP_PROTOCOL_QNET,
     LIP_PROTOCOL_LOGIN,
     LIP_PROTOCOL_PASSWORD,
-    LIP_QUERY_CHAR,
+    LIP_PROTOCOL_QNET,
     LIP_READ_TIMEOUT,
-    LIP_RESPONSE_RE,
     LIP_USERNAME,
     SOCKET_TIMEOUT,
     LIPConnectionState,
@@ -61,6 +57,7 @@ class LIP:
         self._disconnect_event = asyncio.Event()
         self._reconnecting_event = asyncio.Event()
         self._subscriptions = []
+        self._callback = None  # Only one callback, the coordinator
         self._last_keep_alive_response = None
         self._keep_alive_task = None
         self.loop = None
@@ -228,53 +225,35 @@ class LIP:
             return
 
     def _process_message(self, response):
-        """Process a lip message."""
-        if response is not None and response.startswith(LIP_PROTOCOL_QNET):
-            response = response[len(LIP_PROTOCOL_QNET) :]
+        """Process a lip message. This is processing only response (i.e. ~") events."""
 
-        if not response or LIP_EMPTY_RE.match(response):
-            return
+        message = self._parser.parse(response)
 
-        match = LIP_RESPONSE_RE.match(response)
-        if match:
-            try:
-                message = LIPMessage(
-                    LIP_PROTOCOL_MODE_TO_LIPMODE.get(match.group(1), LIPMode.UNKNOWN),
-                    int(match.group(2)),
-                    int(match.group(3)),
-                    float(match.group(4)),
-                )
-                for callback in self._subscriptions:
-                    callback(message)
-            except ValueError:
-                pass
-        elif LIP_KEEPALIVE_RE.match(response):
-            self._last_keep_alive_response = time.time()
-        elif LIP_ERROR_RE.match(response):
-            _LOGGER.error("Protocol Error: %s", response)
-        else:
-            _LOGGER.debug("Unknown lutron message: %s", response)
+        if message:
+            if message.mode == LIPMode.KEEPALIVE:
+                self._last_keep_alive_response = self._parser.last_keepalive
+            elif message.mode == LIPMode.ERROR:
+                _LOGGER.error("Protocol Error: %s", response)
+            elif message.mode != LIPMode.UNKNOWN:
+                try:
+                    if self._callback:
+                        self._callback(message)
+                except ValueError:
+                    _LOGGER.warning("Error dispatching message: %s", response)
+            else:
+                _LOGGER.debug("Unknown lutron message: %s", response)
 
-    async def query(self, mode, integration_id, action, *args):
+    async def query(self, mode, *args):
         """Query the bridge."""
-        await self._async_send_command(
-            LIP_QUERY_CHAR, mode, integration_id, action, *args
-        )
+        await self._async_send_command(LIPOperation.QUERY, mode, *args)
 
-    async def action(self, mode, integration_id, action, *args):
+    async def action(self, mode, *args):
         """Do an action on the bridge."""
-        await self._async_send_command(
-            LIP_ACTION_CHAR, mode, integration_id, action, *args
-        )
+        await self._async_send_command(LIPOperation.EXECUTE, mode, *args)
 
-    def subscribe(self, callback):
-        """Subscribe to lip events."""
-
-        def _unsub_callback():
-            self._subscriptions.remove(callback)
-
-        self._subscriptions.append(callback)
-        return _unsub_callback
+    def set_callback(self, callback: Callable[[LIPMessage], None]) -> None:
+        """Set the callback for LIP messages."""
+        self._callback = callback
 
     async def _async_send_command(self, protocol_header, mode, *cmd):
         """Send a command."""
