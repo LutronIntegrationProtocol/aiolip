@@ -4,25 +4,17 @@ import asyncio
 from enum import Enum
 import re
 
-LIP_RESPONSE_RE = re.compile("~([A-Z]+),([0-9.]+),([0-9.]+),([0-9.]+)")
-LIP_KEEPALIVE_RE = re.compile("~SYSTEM,")
-LIP_EMPTY_RE = re.compile("^[\r\n]+$")
-LIP_ERROR_RE = re.compile("~ERROR,")
+from .data import LIPMessage, LIPMode, LIPOperation
 
 LIP_PROTOCOL_LOGIN = "login: "
 LIP_PROTOCOL_PASSWORD = "password: "
 LIP_PROTOCOL_GNET = "GNET> "
 LIP_PROTOCOL_QNET = "QNET> "
+LIP_PROTOCOL_GENERIC_NET = "NET> "
 
 LIP_USERNAME = "lutron"
 LIP_PASSWORD = "integration"
 LIP_PORT = 23
-
-LIP_QUERY_CHAR = "?"
-LIP_ACTION_CHAR = "#"
-
-LIP_BUTTON_PRESS = 3
-LIP_BUTTON_RELEASE = 4
 
 LIP_KEEP_ALIVE = "?SYSTEM,10"
 
