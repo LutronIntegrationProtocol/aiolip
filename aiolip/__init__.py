@@ -57,6 +57,7 @@ class LIP:
         self._disconnect_event = asyncio.Event()
         self._reconnecting_event = asyncio.Event()
         self._callback = None  # Only one callback, the coordinator
+        self._keep_alive_reconnect_task = None
         self._last_keep_alive_response = None
         self._keep_alive_task = None
         self.loop = None
@@ -164,14 +165,16 @@ class LIP:
             self._last_keep_alive_response = time.time()
 
     def _keepalive_watchdog(self):
-        """Send keep alives."""
+        """Send keepalives."""
         if (
             self._disconnect_event.is_set()
             or self.connection_state != LIPConnectionState.CONNECTED
         ):
             return
 
-        asyncio.create_task(self._async_keep_alive_or_reconnect())
+        self._keep_alive_reconnect_task = asyncio.create_task(
+            self._async_keep_alive_or_reconnect()
+        )
 
         self._keep_alive_task = self.loop.call_later(
             LIP_KEEP_ALIVE_INTERVAL, self._keepalive_watchdog
