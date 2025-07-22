@@ -73,7 +73,7 @@ class LIP:
 
         try:
             await self._async_connect(server_addr)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             _LOGGER.debug("Timed out while trying to connect to %s", server_addr)
             self.connection_state = LIPConnectionState.NOT_CONNECTED
             raise
@@ -132,13 +132,13 @@ class LIP:
             while not self._disconnect_event.is_set():
                 try:
                     await self._async_connect(self._host)
-                    self._keepalive_watchdog()
-                    return
-                except (OSError, asyncio.TimeoutError):
+                except (TimeoutError, OSError):
                     _LOGGER.debug(
                         "Timed out while trying to reconnect to %s", self._host
                     )
-                    pass
+                else:
+                    self._keepalive_watchdog()
+                    return
 
     async def async_stop(self):
         """Disconnect from the bridge."""
@@ -153,14 +153,14 @@ class LIP:
         connection_error = False
         try:
             await self._lip.async_write_command(LIP_KEEP_ALIVE)
-        except (asyncio.TimeoutError, ConnectionResetError) as ex:
+        except (TimeoutError, ConnectionResetError) as ex:
             _LOGGER.debug("Lutron bridge disconnected: %s", ex)
             connection_error = True
 
         if connection_error or self._last_keep_alive_response < time.time() - (
             LIP_KEEP_ALIVE_INTERVAL + SOCKET_TIMEOUT
         ):
-            _LOGGER.debug("Lutron bridge keep alive timeout, reconnecting.")
+            _LOGGER.debug("Lutron bridge keep alive timeout, reconnecting")
             await self._async_disconnected()
             self._last_keep_alive_response = time.time()
 
