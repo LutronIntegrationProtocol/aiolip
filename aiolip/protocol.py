@@ -87,3 +87,80 @@ class LIPSocket:
     def __del__(self):
         """Cleanup when the object is deleted."""
         self._writer.close()
+
+
+class LIPParser:
+    """Parse a message from the Lutron controller."""
+
+    def __init__(self):
+        """Initialize the parser."""
+        # Single regex pattern for all modes with optional parameters
+        self._pattern = re.compile(r"~(\w+),(\d+),(\d+)(?:,([0-9.]+))?(?:,([0-9.]+))?")
+
+        # Special message types
+        self._keepalive_re = re.compile(r"~SYSTEM")
+        self._error_re = re.compile(r"~ERROR,(\d+)")
+        self._empty_re = re.compile("^[\r\n]+$")
+        self._clean_prompt_re = re.compile("^(\x00|\\s*[A-Z]NET>\\s*)+")
+
+        # Internal state
+        self._last_keep_alive_response: float = 0.0
+
+    @property
+    def last_keepalive(self) -> float:
+        """Return last keepalive response."""
+        return self._last_keep_alive_response
+
+    def parse(self, response: str) -> LIPMessage | None:
+        """Parse a LIP response and update the internal state. Returns a LIPMessage or None."""
+        if not response or self._empty_re.match(response):
+            return None
+
+        response = self._clean_prompt_re.sub("", response)
+
+        if self._keepalive_re.match(response):
+            self._last_keep_alive_response = time.time()
+            return LIPMessage(mode=LIPMode.KEEPALIVE, raw=response)
+
+        if self._error_re.match(response):
+            return LIPMessage(mode=LIPMode.ERROR, raw=response)
+
+        if not response.startswith(LIPOperation.RESPONSE):
+            return None
+
+        try:
+            msg = self._parse_message(response)
+            msg.raw = response
+        except Exception as ex:
+            raise ValueError(f"Failed to parse LIP {response} message") from ex
+        return msg
+
+    def _parse_message(self, response: str) -> LIPMessage:
+        """Unified parser function for all message types."""
+        match = self._pattern.match(response)
+
+        if not match:
+            raise ValueError(f"Malformed response: {response}")
+
+        mode = LIPMode.from_string(match.group(1))
+
+        if mode == LIPMode.UNKNOWN:
+            return LIPMessage(mode=LIPMode.UNKNOWN, raw=response)
+
+        # Extract common fields
+        kwargs = {
+            "mode": mode,
+            "integration_id": int(match.group(2)),  # Always group 2
+        }
+
+        # Extract mode-specific fields based on the mode's parser configuration
+        for field_name, (group_index, converter) in mode.parser_config.items():
+            if group_index is None:
+                # Field is always None for this mode
+                kwargs[field_name] = None  # type: ignore[assignment]
+            else:
+                # Extract and convert the value
+                raw_value = match.group(group_index)
+                kwargs[field_name] = converter(raw_value)
+
+        return LIPMessage(**kwargs)  # type: ignore[arg-type]

@@ -7,7 +7,16 @@ import time
 
 __version__ = "1.1.6"
 
-from .data import LIP_PROTOCOL_MODE_TO_LIPMODE, LIPMessage, LIPMode
+__all__ = ["LIPAction", "LIPGroupState", "LIPLedState"]
+
+from .data import (
+    LIPAction,
+    LIPGroupState,
+    LIPLedState,
+    LIPMessage,
+    LIPMode,
+    LIPOperation,
+)
 from .exceptions import LIPConnectionStateError, LIPProtocolError
 from .protocol import (
     CONNECT_TIMEOUT,
@@ -19,6 +28,7 @@ from .protocol import (
     LIP_KEEPALIVE_RE,
     LIP_PASSWORD,
     LIP_PORT,
+    LIP_PROTOCOL_GENERIC_NET,
     LIP_PROTOCOL_GNET,
     LIP_PROTOCOL_QNET,
     LIP_PROTOCOL_LOGIN,
@@ -46,6 +56,7 @@ class LIP:
         self._controller_type = None
         self._lip = None
         self._host = None
+        self._parser = LIPParser()
         self._read_connect_lock = asyncio.Lock()
         self._disconnect_event = asyncio.Event()
         self._reconnecting_event = asyncio.Event()
