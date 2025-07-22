@@ -1,3 +1,5 @@
+"""Implement the Lutron Integration Protocol."""
+
 import asyncio
 import logging
 import socket

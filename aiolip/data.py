@@ -1,3 +1,5 @@
+"""classes for the LIP protocol."""
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -12,7 +14,9 @@ class LIPMessage:
     value: float
 
 
-class LIPConenctionState(Enum):
+class LIPConnectionState(Enum):
+    """Connection state."""
+
     NOT_CONNECTED = 0
     CONNECTING = 1
     CONNECTED = 2

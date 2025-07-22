@@ -1,3 +1,5 @@
+"""Lutron Protocol."""
+
 import asyncio
 from enum import Enum
 import re
@@ -51,17 +53,20 @@ class LIPSocket:
     """A socket that reads and writes lip protocol."""
 
     def __init__(self, reader, writer):
+        """Initialize the socket."""
         self._writer = writer
         self._reader = reader
 
     async def async_readline(self, timeout=SOCKET_TIMEOUT):
+        """Read one line from the socket."""
         buffer = await asyncio.wait_for(self._reader.readline(), timeout=timeout)
         if buffer == b"":
             return None
 
         return buffer.decode("UTF-8")
 
-    async def async_readuntil(self, seperator, timeout=SOCKET_TIMEOUT):
+    async def async_readuntil(self, separator, timeout=SOCKET_TIMEOUT):
+        """Read until separator is ended."""
         buffer = await asyncio.wait_for(
             self._reader.readuntil(seperator.encode("UTF-8")), timeout=timeout
         )
@@ -71,6 +76,7 @@ class LIPSocket:
         return buffer.decode("UTF-8")
 
     async def async_write_command(self, text):
+        """Write command to lip protocol."""
         self._writer.write(text.encode("UTF-8") + b"\r\n")
         await self._writer.drain()
 
