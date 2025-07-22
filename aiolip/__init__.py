@@ -27,6 +27,8 @@ from .protocol import (
     LIP_USERNAME,
     SOCKET_TIMEOUT,
     LIPConnectionState,
+    LIPControllerType,
+    LIPParser,
     LIPSocket,
 )
 
@@ -39,6 +41,7 @@ class LIP:
     def __init__(self):
         """Create the LIP class."""
         self.connection_state = LIPConnectionState.NOT_CONNECTED
+        self._controller_type = None
         self._lip = None
         self._host = None
         self._read_connect_lock = asyncio.Lock()
@@ -86,9 +89,19 @@ class LIP:
             await self._lip.async_readuntil(" "), LIP_PROTOCOL_PASSWORD
         )
         await self._lip.async_write_command(LIP_PASSWORD)
-        _verify_expected_response(
-            await self._lip.async_readuntil(" "), LIP_PROTOCOL_QNET
-        )
+
+        controller_type = await self._lip.async_readuntil(" ")
+
+        _verify_expected_response(controller_type, LIP_PROTOCOL_GENERIC_NET)
+
+        if LIP_PROTOCOL_QNET in controller_type:
+            self._controller_type = LIPControllerType.HOMEWORKS
+        elif LIP_PROTOCOL_GNET in controller_type:
+            self._controller_type = LIPControllerType.RADIORA2
+        else:
+            self._controller_type = LIPControllerType.UNKNOWN
+            _LOGGER.warning("Unknown controller type: %s", controller_type)
+
         self.connection_state = LIPConnectionState.CONNECTED
         self._host = server_addr
         self._reconnecting_event.clear()

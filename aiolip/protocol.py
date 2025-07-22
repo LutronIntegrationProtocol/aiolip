@@ -31,6 +31,14 @@ LIP_READ_TIMEOUT = 60
 LIP_KEEP_ALIVE_INTERVAL = 60
 
 
+class LIPControllerType(Enum):
+    """Lutron controller type."""
+
+    UNKNOWN = 0
+    RADIORA2 = 1
+    HOMEWORKS = 2
+
+
 class LIPConnectionState(Enum):
     """Connection state."""
 
