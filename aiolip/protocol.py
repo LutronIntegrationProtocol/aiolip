@@ -31,7 +31,9 @@ LIP_READ_TIMEOUT = 60
 LIP_KEEP_ALIVE_INTERVAL = 60
 
 
-class LIPConenctionState(Enum):
+class LIPConnectionState(Enum):
+    """Connection state."""
+
     NOT_CONNECTED = 0
     CONNECTING = 1
     CONNECTED = 2

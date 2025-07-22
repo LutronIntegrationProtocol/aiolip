@@ -26,7 +26,7 @@ from .protocol import (
     LIP_RESPONSE_RE,
     LIP_USERNAME,
     SOCKET_TIMEOUT,
-    LIPConenctionState,
+    LIPConnectionState,
     LIPSocket,
 )
 
@@ -38,7 +38,7 @@ class LIP:
 
     def __init__(self):
         """Create the LIP class."""
-        self.connection_state = LIPConenctionState.NOT_CONNECTED
+        self.connection_state = LIPConnectionState.NOT_CONNECTED
         self._lip = None
         self._host = None
         self._read_connect_lock = asyncio.Lock()
@@ -53,7 +53,7 @@ class LIP:
         """Connect to the bridge via LIP."""
         self.loop = asyncio.get_event_loop()
 
-        if self.connection_state != LIPConenctionState.NOT_CONNECTED:
+        if self.connection_state != LIPConnectionState.NOT_CONNECTED:
             raise LIPConnectionStateError
 
         self._disconnect_event.clear()
@@ -62,13 +62,13 @@ class LIP:
             await self._async_connect(server_addr)
         except asyncio.TimeoutError:
             _LOGGER.debug("Timed out while trying to connect to %s", server_addr)
-            self.connection_state = LIPConenctionState.NOT_CONNECTED
+            self.connection_state = LIPConnectionState.NOT_CONNECTED
             raise
 
     async def _async_connect(self, server_addr):
         """Make the connection."""
         _LOGGER.debug("Connecting to %s", server_addr)
-        self.connection_state = LIPConenctionState.CONNECTING
+        self.connection_state = LIPConnectionState.CONNECTING
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(
                 server_addr,
@@ -89,7 +89,7 @@ class LIP:
         _verify_expected_response(
             await self._lip.async_readuntil(" "), LIP_PROTOCOL_QNET
         )
-        self.connection_state = LIPConenctionState.CONNECTED
+        self.connection_state = LIPConnectionState.CONNECTED
         self._host = server_addr
         self._reconnecting_event.clear()
         _LOGGER.debug("Connected to %s", server_addr)
@@ -105,7 +105,7 @@ class LIP:
 
         self._reconnecting_event.set()
         async with self._read_connect_lock:
-            self.connection_state = LIPConenctionState.NOT_CONNECTED
+            self.connection_state = LIPConnectionState.NOT_CONNECTED
             while not self._disconnect_event.is_set():
                 try:
                     await self._async_connect(self._host)
@@ -145,7 +145,7 @@ class LIP:
         """Send keep alives."""
         if (
             self._disconnect_event.is_set()
-            or self.connection_state != LIPConenctionState.CONNECTED
+            or self.connection_state != LIPConnectionState.CONNECTED
         ):
             return
 
@@ -157,7 +157,7 @@ class LIP:
 
     async def async_run(self):
         """Start interacting with the bridge."""
-        if self.connection_state != LIPConenctionState.CONNECTED:
+        if self.connection_state != LIPConnectionState.CONNECTED:
             raise LIPConnectionStateError
 
         self._last_keep_alive_response = time.time()
@@ -252,7 +252,7 @@ class LIP:
 
     async def _async_send_command(self, protocol_header, mode, *cmd):
         """Send a command."""
-        if self.connection_state != LIPConenctionState.CONNECTED:
+        if self.connection_state != LIPConnectionState.CONNECTED:
             raise LIPConnectionStateError
 
         assert isinstance(mode, LIPMode)
