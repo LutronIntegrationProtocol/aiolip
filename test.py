@@ -12,12 +12,12 @@ async def main():
 
     logging.basicConfig(level=logging.DEBUG)
 
-    await lip.async_connect("192.168.209.70")
+    await lip.async_connect("192.168.1.2")
 
     def message(msg):
         _LOGGER.warning(msg)
 
-    lip.subscribe(message)
+    lip.set_callback(message)
     task = asyncio.create_task(lip.async_run())
     await lip.query(LIPMode.OUTPUT, 31, 1)
     #await lip.async_stop()
