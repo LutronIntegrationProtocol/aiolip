@@ -15,7 +15,7 @@ classifiers = [
   'Intended Audience :: Developers',
   'License :: OSI Approved :: Apache Software License',
   'Natural Language :: English',
-  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.12',
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3",
 ]
@@ -24,7 +24,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.13"
+python = "^3.12"
 
 [tool.poetry.group.dev.dependencies]
 codespell = "2.4.1"
@@ -60,7 +60,7 @@ source = ["aiolip"]
 # free to run mypy on Windows, Linux, or macOS and get consistent
 # results.
 platform = "linux"
-python_version = "3.13"
+python_version = "3.12"
 
 # show error messages from unrelated files
 follow_imports = "normal"
