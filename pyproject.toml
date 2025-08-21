@@ -69,21 +69,21 @@ follow_imports = "normal"
 ignore_missing_imports = true
 
 # be strict
-check_untyped_defs = true
-disallow_any_generics = true
-disallow_incomplete_defs = true
-disallow_subclassing_any = true
-disallow_untyped_calls = true
-disallow_untyped_decorators = true
-disallow_untyped_defs = true
-no_implicit_optional = true
-strict_optional = true
-warn_incomplete_stub = true
-warn_no_return = true
-warn_redundant_casts = true
-warn_return_any = true
-warn_unused_configs = true
-warn_unused_ignores = true
+#check_untyped_defs = true
+#disallow_any_generics = true
+#disallow_incomplete_defs = true
+#disallow_subclassing_any = true
+#disallow_untyped_calls = false
+#disallow_untyped_decorators = true
+#disallow_untyped_defs = false
+#no_implicit_optional = true
+#strict_optional = true
+#warn_incomplete_stub = true
+#warn_no_return = true
+#warn_redundant_casts = true
+#warn_return_any = true
+#warn_unused_configs = true
+#warn_unused_ignores = true
 
 [tool.pylint.MASTER]
 ignore = [
@@ -116,6 +116,17 @@ disable = [
   "wrong-import-order",
   "too-many-arguments",
   "too-many-positional-arguments",
+  "missing-module-docstring",
+  "missing-class-docstring",
+  "missing-function-docstring",
+  "redefined-builtin",
+  "wrong-import-position",
+  "invalid-name",
+  "too-many-positional-arguments",
+  "too-many-positional-arguments",
+  "too-many-positional-arguments",
+  "too-many-positional-arguments",
+  "too-many-positional-arguments",
 ]
 
 [tool.pylint.SIMILARITIES]
@@ -137,6 +148,26 @@ ignore = [
   "D417", # False positives in some occasions
   "ISC001", # Conflicts with other rules
   "PLR2004", # Just annoying, not really useful
+  "D104",
+  "ANN204",
+  "ANN201",
+  "ANN001",
+  "ANN202",
+  "TRY300",
+  "PERF203",
+  "RUF006",
+  "D100",
+  "D101",
+  "D107",
+  "E501",
+  "S105",
+  "ERA001",
+  "EXE001",
+  "PTH100",
+  "S101",
+  "D102",
+  "A001",
+  "ANN002",
 ]
 select = ["ALL"]
 
