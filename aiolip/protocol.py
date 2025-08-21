@@ -1,6 +1,9 @@
 """Lutron Integration Protocol (LIP) constants and socket handling."""
 
+from __future__ import annotations
+
 import asyncio
+from asyncio import StreamReader, StreamWriter
 from enum import Enum
 import re
 
@@ -43,12 +46,12 @@ class LIPConenctionState(Enum):
 class LIPSocket:
     """A socket that reads and writes lip protocol."""
 
-    def __init__(self, reader, writer):
+    def __init__(self, reader: StreamReader, writer: StreamWriter) -> None:
         """Initialize the LIP socket."""
         self._writer = writer
         self._reader = reader
 
-    async def async_readline(self, timeout=SOCKET_TIMEOUT):
+    async def async_readline(self, timeout: int = SOCKET_TIMEOUT) -> str | None:
         """Read a line from the socket with a timeout."""
         buffer = await asyncio.wait_for(self._reader.readline(), timeout=timeout)
         if buffer == b"":
@@ -56,7 +59,9 @@ class LIPSocket:
 
         return buffer.decode("UTF-8")
 
-    async def async_readuntil(self, seperator, timeout=SOCKET_TIMEOUT):
+    async def async_readuntil(
+        self, seperator: str, timeout: int = SOCKET_TIMEOUT
+    ) -> str | None:
         """Read until a specific separator is found with a timeout."""
         buffer = await asyncio.wait_for(
             self._reader.readuntil(seperator.encode("UTF-8")), timeout=timeout
@@ -66,15 +71,15 @@ class LIPSocket:
 
         return buffer.decode("UTF-8")
 
-    async def async_write_command(self, text):
+    async def async_write_command(self, text: str) -> None:
         """Write a command to the socket."""
         self._writer.write(text.encode("UTF-8") + b"\r\n")
         await self._writer.drain()
 
-    def close(self):
+    def close(self) -> None:
         """Cleanup when disconnected."""
         self._writer.close()
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Cleanup when the object is deleted."""
         self._writer.close()

@@ -1,5 +1,7 @@
 """LIP data structures and enums for aiolip."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -8,7 +10,7 @@ from enum import Enum
 class LIPMessage:
     """Class for LIP messages."""
 
-    mode: str
+    mode: LIPMode
     integration_id: int
     action_number: int
     value: float
