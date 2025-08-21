@@ -1,3 +1,5 @@
+"""LIP data structures and enums for aiolip."""
+
 from dataclasses import dataclass
 from enum import Enum
 
@@ -13,12 +15,16 @@ class LIPMessage:
 
 
 class LIPConenctionState(Enum):
+    """Enum for LIP connection states."""
+
     NOT_CONNECTED = 0
     CONNECTING = 1
     CONNECTED = 2
 
 
 class LIPMode(Enum):
+    """Enum for LIP protocol modes."""
+
     OUTPUT = "OUTPUT"
     DEVICE = "DEVICE"
     UNKNOWN = -1
