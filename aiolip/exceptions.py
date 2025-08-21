@@ -19,4 +19,7 @@ class LIPProtocolError(Exception):
 
     def __str__(self) -> str:
         """Return string representation."""
-        return f"Lutron Protocol Error received=[{self.received}] expected=[{self.expected}]"
+        return (
+            f"Lutron Protocol Error received=[{self.received}] "
+            f"expected=[{self.expected}]"
+        )

@@ -10,11 +10,11 @@ LIP_EMPTY_RE = re.compile("^[\r\n]+$")
 LIP_ERROR_RE = re.compile("~ERROR,")
 
 LIP_PROTOCOL_LOGIN = "login: "
-LIP_PROTOCOL_PASSWORD = "password: "
+LIP_PROTOCOL_PASSWORD = "password: "  # noqa: S105
 LIP_PROTOCOL_GNET = "GNET> "
 
 LIP_USERNAME = "lutron"
-LIP_PASSWORD = "integration"
+LIP_PASSWORD = "integration"  # noqa: S105
 LIP_PORT = 23
 
 LIP_QUERY_CHAR = "?"
