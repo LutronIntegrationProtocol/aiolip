@@ -1,3 +1,6 @@
+"""Exceptions for the Lutron Integration Protocol (LIP)."""
+
+
 class LIPConnectionStateError(Exception):
     """An exception to represent a conneciton state error."""
 
@@ -10,6 +13,7 @@ class LIPProtocolError(Exception):
     """An exception to represent a protocol error."""
 
     def __init__(self, received, expected):
+        """Initialize the protocol error with received and expected values."""
         self.received = received
         self.expected = expected
 
