@@ -248,12 +248,10 @@ class LIP:
         self._subscriptions.append(callback)
         return _unsub_callback
 
-    async def _async_send_command(self, protocol_header, mode, *cmd):
+    async def _async_send_command(self, protocol_header, mode: LIPMode, *cmd):
         """Send a command."""
         if self.connection_state != LIPConenctionState.CONNECTED:
             raise LIPConnectionStateError
-
-        assert isinstance(mode, LIPMode)
 
         request = ",".join([mode.name, *[str(key) for key in cmd]])
         await self._lip.async_write_command(f"{protocol_header}{request}")
