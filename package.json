@@ -1,0 +1,14 @@
+{
+  "name": "aiolip",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Asynchronous Python client for Lutron Integration Protocol.",
+  "scripts": {
+    "prettier": "prettier --write **/*.{json,js,md,yml,yaml}"
+  },
+  "author": "J. Nick Koston <nick@koston.org>",
+  "license": "apache-2.0",
+  "devDependencies": {
+    "prettier": "3.6.2"
+  }
+}

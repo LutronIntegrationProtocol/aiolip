@@ -114,7 +114,6 @@ class LIP:
                     _LOGGER.debug(
                         "Timed out while trying to reconnect to %s", self._host
                     )
-                    pass
 
     async def async_stop(self):
         """Disconnect from the bridge."""
